@@ -1,0 +1,14 @@
+cff-version: 0.0.1
+message: "If you use this software, please cite it as below."
+title: "Anchored Diffusion Language Model"
+doi: "10.48550/arXiv.2505.18456"
+authors:
+  - family-names: "Rout"
+    given-names: "Litu"
+  - family-names: "Caramanis"
+    given-names: "Constantine"
+  - family-names: "Shakkottai"
+    given-names: "Sanjay"
+date-released: 2025-05-24
+version: "arXiv:2505.18456v1"
+

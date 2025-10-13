@@ -1,0 +1,8 @@
+ckpts/*
+models/__pycache__/*
+models/*.pyc
+__pycache__/*
+outputs/*
+watchfolder/*
+*.out
+debug/*
