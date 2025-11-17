@@ -206,7 +206,7 @@ def _train(config, logger, tokenizer):
 def main(config):
   """Main entry point for training."""
   L.seed_everything(config.seed)
-  _print_config(config, resolve=True, save_cfg=True)
+  # _print_config(config, resolve=True, save_cfg=True)
 
   logger = utils.get_logger(__name__)
   tokenizer = dataloader.get_tokenizer(config)
