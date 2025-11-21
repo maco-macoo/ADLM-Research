@@ -323,15 +323,21 @@ def get_dataset(
     dataset = datasets.load_dataset(
       'wikitext',
       name='wikitext-103-raw-v1',
-      cache_dir=cache_dir)
+      cache_dir=cache_dir,
+      streaming=streaming,
+      trust_remote_code=True)
   elif dataset_name == 'wikitext2':
     dataset = datasets.load_dataset(
       'wikitext',
       name='wikitext-2-raw-v1',
-      cache_dir=cache_dir)
+      cache_dir=cache_dir,
+      streaming=streaming,
+      trust_remote_code=True)
   elif dataset_name == 'ptb':
     dataset = datasets.load_dataset(
-      'ptb_text_only', cache_dir=cache_dir)
+      'ptb_text_only', cache_dir=cache_dir,
+      streaming=streaming,
+      trust_remote_code=True)
   elif dataset_name == 'lambada':
     dataset = get_lambada_test_dataset()
   elif dataset_name == 'text8':
@@ -346,38 +352,55 @@ def get_dataset(
       'openwebtext',
       split='train[:-100000]',
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
+    # ストリーミングモードでもシャッフル可能
+    if streaming:
+      dataset = dataset.shuffle(seed=42, buffer_size=10000)
   elif dataset_name == 'openwebtext-valid':
     dataset = datasets.load_dataset(
       'openwebtext',
       split='train[-100000:]',
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
+  elif dataset_name == 'openwebtext': # 追加
+    dataset = datasets.load_dataset(
+      'openwebtext',
+      split='train',
+      cache_dir=cache_dir,
+      streaming=streaming,
+      trust_remote_code=True)
+    # ストリーミングモードでもシャッフル可能
+    if streaming:
+      dataset = dataset.shuffle(seed=42, buffer_size=10000)
   elif dataset_name == 'scientific_papers_arxiv':
     dataset = datasets.load_dataset(
       'scientific_papers', 'arxiv',
-      trust_remote_code=True,
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
   elif dataset_name == 'scientific_papers_pubmed':
     dataset = datasets.load_dataset(
       'scientific_papers', 'pubmed',
-      trust_remote_code=True,
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
   elif dataset_name == 'ag_news':
     dataset = datasets.load_dataset(
       'ag_news',
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
   else:
     dataset = datasets.load_dataset(
       dataset_name,
       cache_dir=cache_dir,
-      streaming=streaming)
+      streaming=streaming,
+      trust_remote_code=True)
 
   if dataset_name in ['lambada', 'openwebtext-train',
-                      'openwebtext-valid']:
+                      'openwebtext-valid', 'openwebtext']:
     data = dataset
   else:
     data = dataset[mode]
@@ -440,8 +463,7 @@ def get_dataset(
   if streaming:
     tokenized_dataset = data.map(
       preprocess_and_tokenize,
-      batched=True,
-      desc='Tokenizing')
+      batched=True)
   else:
     tokenized_dataset = data.map(
       preprocess_and_tokenize,
@@ -471,8 +493,7 @@ def get_dataset(
   if streaming:
     chunked_dataset = tokenized_dataset.map(
       group_texts,
-      batched=True,
-      desc='Grouping')
+      batched=True)
   else:
     chunked_dataset = tokenized_dataset.map(
       group_texts,

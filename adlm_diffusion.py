@@ -248,33 +248,52 @@ class Diffusion(L.LightningModule):
     distributed = (
       self.trainer._accelerator_connector.use_distributed_sampler
       and self.trainer._accelerator_connector.is_distributed)
-    if distributed:
-      sampler_cls = dataloader.FaultTolerantDistributedSampler
-    else:
-      sampler_cls = dataloader.RandomFaultTolerantSampler
+    
+    # Check if dataset is streaming (IterableDataset)
+    is_streaming = self.config.data.streaming
+    
     updated_dls = []
     for dl in self.trainer.fit_loop._combined_loader.flattened:
-      if hasattr(dl.sampler, 'shuffle'):
-        dl_sampler = sampler_cls(
-          dl.dataset, shuffle=dl.sampler.shuffle)
+      # For streaming datasets (IterableDataset), don't use samplers
+      if is_streaming:
+        updated_dls.append(
+          torch.utils.data.DataLoader(
+            dl.dataset,
+            batch_size=self.config.loader.batch_size,
+            num_workers=self.config.loader.num_workers,
+            pin_memory=self.config.loader.pin_memory,
+            shuffle=False,
+            persistent_workers=True))
       else:
-        dl_sampler = sampler_cls(dl.dataset)
-      if (distributed
-          and self.fast_forward_epochs is not None
-          and self.fast_forward_batches is not None):
-        dl_sampler.load_state_dict({
-          'epoch': self.fast_forward_epochs,
-          'counter': (self.fast_forward_batches
-                      * self.config.loader.batch_size)})
-      updated_dls.append(
-        torch.utils.data.DataLoader(
-          dl.dataset,
-          batch_size=self.config.loader.batch_size,
-          num_workers=self.config.loader.num_workers,
-          pin_memory=self.config.loader.pin_memory,
-          sampler=dl_sampler,
-          shuffle=False,
-          persistent_workers=True))
+        # For non-streaming datasets, use fault-tolerant samplers
+        if distributed:
+          sampler_cls = dataloader.FaultTolerantDistributedSampler
+        else:
+          sampler_cls = dataloader.RandomFaultTolerantSampler
+        
+        if hasattr(dl.sampler, 'shuffle'):
+          dl_sampler = sampler_cls(
+            dl.dataset, shuffle=dl.sampler.shuffle)
+        else:
+          dl_sampler = sampler_cls(dl.dataset)
+        
+        if (distributed
+            and self.fast_forward_epochs is not None
+            and self.fast_forward_batches is not None):
+          dl_sampler.load_state_dict({
+            'epoch': self.fast_forward_epochs,
+            'counter': (self.fast_forward_batches
+                        * self.config.loader.batch_size)})
+        
+        updated_dls.append(
+          torch.utils.data.DataLoader(
+            dl.dataset,
+            batch_size=self.config.loader.batch_size,
+            num_workers=self.config.loader.num_workers,
+            pin_memory=self.config.loader.pin_memory,
+            sampler=dl_sampler,
+            shuffle=False,
+            persistent_workers=True))
     self.trainer.fit_loop._combined_loader.flattened = updated_dls
 
   def optimizer_step(self, *args, **kwargs):

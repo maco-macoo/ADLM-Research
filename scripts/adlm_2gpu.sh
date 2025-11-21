@@ -15,10 +15,10 @@ torchrun \
     --nnodes=1 \
     --master_port="${MASTER_PORT}" \
     adlm_main.py \
-    loader.global_batch_size=32 \
+    loader.global_batch_size=16 \
     model=small \
-    data=openwebtext-split \
-    data.cache_dir=/home/smakoto/.cache/huggingface/hub \
+    data=openwebtext-streaming \
+    data.cache_dir=/home/smakoto/PROJECT/datasets \
     wandb.name=adlm \
     parameterization=subs \
     model.length=1024 \
@@ -26,12 +26,12 @@ torchrun \
     sampling.steps=1000 \
     checkpointing.save_dir="outputs/adlm/" \
     trainer.num_nodes=1 \
-    trainer.val_check_interval=2000 \
+    trainer.val_check_interval=10000 \
     trainer.log_every_n_steps=1000 \
-    trainer.max_steps=10000 \
+    trainer.max_steps=1_000_000 \
     checkpointing.resume_from_ckpt=True \
     time_conditioning=False \
     enable_anchor_loss=True \
     base_scaling_factor1=3e-3 \
     base_scaling_factor2=1 \
-    threshold=5 2>&1 | tee "outputs/adlm-2gpu_log/training.log"
+    threshold=5
