@@ -15,9 +15,10 @@ from tqdm import tqdm
 CACHE_DIR = '/home_lab/b220083/PROJECT/datasets'
 DATASET_NAME = 'openwebtext'
 DATASET_SPLIT = 'train[:-100000]'  # Exclude last 100k as in dataloader.py
-OUTPUT_PATH = '/home_lab/b220083/PROJECT/ADLM-Research/exp/tfidf_stats.json'
-VALIDATION_OUTPUT_PATH = '/home_lab/b220083/PROJECT/ADLM-Research/exp/tfidf_validation.json'
-VALIDATION_MATRIX_PATH = '/home_lab/b220083/PROJECT/ADLM-Research/exp/tfidf_validation_matrix.txt'
+OUTPUT_DIR = '/home_lab/b220083/PROJECT/ADLM-Research/outputs/tf-idf'
+OUTPUT_PATH = OUTPUT_DIR + '/tf-idf_stats.json'
+VALIDATION_OUTPUT_PATH = OUTPUT_DIR + '/tf-idf_validation.json'
+VALIDATION_MATRIX_PATH = OUTPUT_DIR + '/tf-idf_validation_matrix.txt'
 
 # TF-IDF Vocabulary Selection Parameters
 # MAX_FEATURES: Maximum vocabulary size. Larger = more tokens but higher computation cost.
